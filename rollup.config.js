@@ -1,13 +1,11 @@
 import { terser } from 'rollup-plugin-terser';
 import typescript from 'rollup-plugin-typescript2';
-import resolve from 'rollup-plugin-node-resolve';
 
 export default [
   {
     input: 'src/index.ts',
     plugins: [
       terser(),
-      resolve(),
       typescript({
         typescript: require('typescript'),
       })
@@ -22,7 +20,6 @@ export default [
   {
     input: 'src/index.ts',
     plugins: [
-      resolve(),
       typescript({
         typescript: require('typescript'),
       })

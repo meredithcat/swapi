@@ -110,5 +110,5 @@ function getPlanet(planetId) {
         });
     });
 }
-getPlanet(1).then(function (result) { return console.log(result); });
+getPlanet(2).then(function (result) { return console.log(result); });
 export { Person, Planet, getPerson, getPlanet };

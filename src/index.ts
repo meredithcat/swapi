@@ -12,6 +12,17 @@ class Person {
   }
 }
 
+interface PlanetJSON {
+  name: string;
+  rotation_period: string;
+  orbital_period: string;
+  diameter: string;
+  climate: string;
+  gravity: string;
+  terrain: string;
+  population: string;
+}
+
 class Planet {
   name: string;
   rotationPeriod: number;
@@ -42,6 +53,18 @@ class Planet {
 
   setResidents(residents: Person[]) {
     this.residents = residents;
+  }
+
+  static fromJSON(json: PlanetJSON) {
+    let planet = Object.create(Planet.prototype);
+      // copy all the fields from the json object
+      return Object.assign(planet, json, {
+        // convert fields that need converting
+        rotationPeriod: parseInt(json.rotation_period),
+        orbitalPeriod: parseInt(json.orbital_period),
+        diameter: parseInt(json.diameter),
+        population: parseInt(json.population),
+      });
   }
 }
 
