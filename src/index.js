@@ -36,34 +36,61 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 var cross_fetch_1 = require("cross-fetch");
-/*
- * Classes
- */
 var Person = /** @class */ (function () {
-    function Person(_a) {
-        var name = _a.name;
-        this.name = name;
+    function Person() {
     }
+    Person.prototype.setFilms = function (films) {
+        this.films = films;
+    };
+    Person.prototype.setSpecies = function (species) {
+        this.species = species;
+    };
+    Person.fromJSON = function (json) {
+        var person = Object.create(Person.prototype);
+        // copy all the fields from the json object
+        return Object.assign(person, json, {
+            // convert fields that need converting
+            height: parseInt(json.height),
+            mass: parseInt(json.mass)
+        });
+    };
     return Person;
 }());
 exports.Person = Person;
+var Species = /** @class */ (function () {
+    function Species() {
+    }
+    Species.fromJSON = function (json) {
+        var person = Object.create(Species.prototype);
+        // copy all the fields from the json object
+        return Object.assign(person, json, {
+            // convert fields that need converting
+            average_height: json.average_height == "n/a" ? null : json.average_height,
+            mass: json.homeworld == "n/a" ? null : json.homeworld,
+            language: json.language == "n/a" ? null : json.language
+        });
+    };
+    return Species;
+}());
 var Planet = /** @class */ (function () {
-    function Planet(_a) {
-        var name = _a.name, rotation_period = _a.rotation_period, orbital_period = _a.orbital_period, diameter = _a.diameter, climate = _a.climate, gravity = _a.gravity, terrain = _a.terrain, population = _a.population;
-        this.name = name;
-        this.rotationPeriod = parseInt(rotation_period);
-        this.orbitalPeriod = parseInt(orbital_period);
-        this.diameter = parseInt(diameter);
-        this.climate = climate;
-        this.gravity = gravity;
-        this.terrain = terrain;
-        this.population = parseInt(population);
+    function Planet() {
     }
     Planet.prototype.getName = function () {
         return "my name is " + this.name;
     };
     Planet.prototype.setResidents = function (residents) {
         this.residents = residents;
+    };
+    Planet.fromJSON = function (json) {
+        var planet = Object.create(Planet.prototype);
+        // copy all the fields from the json object
+        return Object.assign(planet, json, {
+            // convert fields that need converting
+            rotationPeriod: parseInt(json.rotation_period),
+            orbitalPeriod: parseInt(json.orbital_period),
+            diameter: parseInt(json.diameter),
+            population: parseInt(json.population)
+        });
     };
     return Planet;
 }());
@@ -74,15 +101,43 @@ exports.Planet = Planet;
 var BASE_URL = 'https://swapi.co/api';
 function getPerson(personId) {
     return __awaiter(this, void 0, void 0, function () {
+        var url, response, json, person, speciesUrl, speciesResponse, speciesJson, filmUrls, error_1;
         return __generator(this, function (_a) {
-            return [2 /*return*/];
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 5, , 6]);
+                    url = BASE_URL + "/people/" + personId + "/";
+                    return [4 /*yield*/, cross_fetch_1["default"](url)];
+                case 1:
+                    response = _a.sent();
+                    return [4 /*yield*/, response.json()];
+                case 2:
+                    json = _a.sent();
+                    person = Person.fromJSON(json);
+                    speciesUrl = json.species[0];
+                    return [4 /*yield*/, cross_fetch_1["default"](speciesUrl)];
+                case 3:
+                    speciesResponse = _a.sent();
+                    return [4 /*yield*/, speciesResponse.json()];
+                case 4:
+                    speciesJson = _a.sent();
+                    person.setSpecies(Species.fromJSON(speciesJson));
+                    filmUrls = json.films;
+                    //    const filmJson = await PromiseRejectionEvent.all();
+                    return [2 /*return*/, person];
+                case 5:
+                    error_1 = _a.sent();
+                    console.log(error_1);
+                    return [2 /*return*/, null];
+                case 6: return [2 /*return*/];
+            }
         });
     });
 }
 exports.getPerson = getPerson;
 function getPlanet(planetId) {
     return __awaiter(this, void 0, void 0, function () {
-        var url, response, json, planet, peopleUrls, peopleJson, people, error_1;
+        var url, response, json, planet, peopleUrls, peopleJson, people, error_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -94,7 +149,7 @@ function getPlanet(planetId) {
                     return [4 /*yield*/, response.json()];
                 case 2:
                     json = _a.sent();
-                    planet = new Planet(json);
+                    planet = Planet.fromJSON(json);
                     peopleUrls = json.residents;
                     return [4 /*yield*/, Promise.all(peopleUrls.map(function (url) {
                             return cross_fetch_1["default"](url).then(function (response) { return response.json(); });
@@ -102,18 +157,21 @@ function getPlanet(planetId) {
                 case 3:
                     peopleJson = _a.sent();
                     people = peopleJson.map(function (json) {
-                        return new Person(json);
+                        return Person.fromJSON(json);
                     });
                     planet.setResidents(people);
                     return [2 /*return*/, planet];
                 case 4:
-                    error_1 = _a.sent();
-                    console.log(error_1);
+                    error_2 = _a.sent();
+                    console.log(error_2);
                     return [2 /*return*/, null];
                 case 5: return [2 /*return*/];
             }
         });
     });
 }
+
+let p = new Person();
+
+
 exports.getPlanet = getPlanet;
-getPlanet(2).then(function (result) { return console.log(result); });

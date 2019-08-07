@@ -4,11 +4,74 @@ import fetch from 'cross-fetch';
  * Classes
  */
 
+interface PersonJSON {
+  name: string;
+  height: string;
+  mass: string;
+  birth_year: string;
+  homeworld: string;
+  species: string[];
+  films: string[];
+}
+
 class Person {
   name: string;
+  height: number;
+  mass: number;
+  birth_year: string;
+  homeworld: string;
+  films: string[];
+  species: Species;
 
-  constructor({name}: {name: string}) {
-    this.name = name;
+  constructor() {}
+
+  setFilms(films: string[]) {
+    this.films = films;
+  }
+
+  setSpecies(species: Species) {
+    this.species = species;
+  }
+
+  static fromJSON(json: PersonJSON) {
+    let person = Object.create(Person.prototype);
+      // copy all the fields from the json object
+      return Object.assign(person, json, {
+        // convert fields that need converting
+        height: parseInt(json.height),
+        mass: parseInt(json.mass),
+      });
+  }
+}
+
+interface SpeciesJSON {
+  name: string;
+  classification: string;
+  average_height: string;
+  average_lifespan: string;
+  homeworld: string | null;
+  language: string;
+}
+
+class Species {
+  name: string;
+  classification: string;
+  average_height: string | null;
+  average_lifespan: string;
+  homeworld: string | null;
+  language: string | null;
+
+  constructor() {}
+
+  static fromJSON(json: SpeciesJSON) {
+    let person = Object.create(Species.prototype);
+      // copy all the fields from the json object
+      return Object.assign(person, json, {
+        // convert fields that need converting
+        average_height: json.average_height == "n/a" ? null : json.average_height,
+        mass: json.homeworld == "n/a" ? null : json.homeworld,
+        language: json.language == "n/a" ? null : json.language,
+      });
   }
 }
 
@@ -24,28 +87,7 @@ interface PlanetJSON {
 }
 
 class Planet {
-  name: string;
-  rotationPeriod: number;
-  orbitalPeriod: number;
-  diameter: number;
-  climate: string;
-  gravity: string;
-  terrain: string;
-  population: number;
-  residents: Person[];
-  constructor(
-      {name, rotation_period, orbital_period, diameter, climate, gravity, terrain, population}: 
-      {name: string, rotation_period: string, orbital_period: string, diameter: string,
-        climate: string, gravity: string, terrain: string, population: string}) {
-    this.name = name;
-    this.rotationPeriod = parseInt(rotation_period);
-    this.orbitalPeriod = parseInt(orbital_period);
-    this.diameter = parseInt(diameter);
-    this.climate = climate;
-    this.gravity = gravity;
-    this.terrain = terrain;
-    this.population = parseInt(population);
-  }
+  constructor() {}
 
   getName(): string {
     return `my name is ${this.name}`;
@@ -75,7 +117,31 @@ class Planet {
 const BASE_URL = 'https://swapi.co/api';
 
 async function getPerson(personId: number) {
-  // TODO write this function
+  try {
+    // Make person API call
+    const url = `${BASE_URL}/people/${personId}/`;
+    const response = await fetch(url);
+    const json: PersonJSON = await response.json();
+
+    // Construct person
+    const person: Person = Person.fromJSON(json);
+
+    // Add species
+    const speciesUrl: string = json.species[0];
+    const speciesResponse = await fetch(speciesUrl);
+    const speciesJson: SpeciesJSON = await speciesResponse.json();
+
+    person.setSpecies(Species.fromJSON(speciesJson));
+
+    // Add films
+    const filmUrls: string[] = json.films;
+//    const filmJson = await PromiseRejectionEvent.all();
+
+    return person;
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
 }
 
 async function getPlanet(planetId: number): Promise<Planet> {
@@ -86,7 +152,7 @@ async function getPlanet(planetId: number): Promise<Planet> {
     const json = await response.json();
 
     // Construct planet
-    const planet: Planet = new Planet(json);
+    const planet: Planet = Planet.fromJSON(json);
     
     // Make people API calls
     const peopleUrls: string[] = json.residents;
@@ -95,8 +161,8 @@ async function getPlanet(planetId: number): Promise<Planet> {
     }));
 
     // Construct people & add to planet
-    const people = peopleJson.map((json) => {
-      return new Person(json);
+    const people = peopleJson.map((json: PersonJSON) => {
+      return Person.fromJSON(json);
     });
     planet.setResidents(people);
 
@@ -108,6 +174,5 @@ async function getPlanet(planetId: number): Promise<Planet> {
   }
 }
 
-getPlanet(2).then((result) => console.log(result));
 
 export { Person, Planet, getPerson, getPlanet };

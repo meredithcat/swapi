@@ -18,7 +18,8 @@
     "@types/node-fetch": "^2.5.0",
     "cross-fetch": "^3.0.4",
     "node-fetch": "^2.6.0",
-    "request": "^2.88.0"
+    "request": "^2.88.0",
+    "tslint": "^5.18.0"
   },
   "devDependencies": {
     "rollup": "^1.17.0",
@@ -27,5 +28,13 @@
     "rollup-plugin-typescript2": "^0.22.1",
     "typescript": "^3.5.3"
   },
-  "description": ""
+  "description": "Source code is located in `src/index.ts`.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/meredithcat/swapi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/meredithcat/swapi/issues"
+  },
+  "homepage": "https://github.com/meredithcat/swapi#readme"
 }
